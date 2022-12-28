@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -5,18 +6,26 @@ import 'package:new_item_experiment/blocs/item_bloc.dart';
 import 'package:new_item_experiment/pages/home_page.dart';
 import 'package:path_provider/path_provider.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final storage = await HydratedStorage.build(
-    storageDirectory: await getApplicationDocumentsDirectory(),
+  HydratedBloc.storage = await HydratedStorage.build(
+    storageDirectory: kIsWeb
+        ? HydratedStorage.webStorageDirectory
+        : await getTemporaryDirectory(),
   );
-  HydratedBlocOverrides.runZoned(
-    () => runApp(RepositoryProvider(
-      create: (context) => SelectedBloc(),
-      child: const MyApp(),
-    )),
-    storage: storage,
-  );
+  runApp(const DIMultiWidgetSubTree());
+}
+
+class DIMultiWidgetSubTree extends StatelessWidget {
+  const DIMultiWidgetSubTree({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return RepositoryProvider(
+        create: (context) => SelectedBloc(), child: const MyApp());
+  }
 }
 
 class MyApp extends StatelessWidget {
